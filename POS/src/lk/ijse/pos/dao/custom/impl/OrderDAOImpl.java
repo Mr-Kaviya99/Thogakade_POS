@@ -2,11 +2,14 @@ package lk.ijse.pos.dao.custom.impl;
 
 import lk.ijse.pos.dao.CrudUtil;
 import lk.ijse.pos.dao.custom.OrderDAO;
-import lk.ijse.pos.model.Item;
 import lk.ijse.pos.model.Orders;
 
 import java.util.ArrayList;
 
+/**
+ * @author : Sanu Vithanage
+ * @since : 0.1.0
+ **/
 
 public class OrderDAOImpl implements OrderDAO {
 
@@ -31,12 +34,8 @@ public class OrderDAOImpl implements OrderDAO {
     }
 
     @Override
-    public ArrayList<Item> getAll() throws Exception {
+    public ArrayList<Orders> getAll() throws Exception {
         throw new UnsupportedOperationException("This feature is not supported yet");
     }
-
-
-
-
 
 }

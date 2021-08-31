@@ -23,11 +23,11 @@ import javafx.util.Callback;
 import lk.ijse.pos.dao.custom.CustomerDAO;
 import lk.ijse.pos.dao.custom.ItemDAO;
 import lk.ijse.pos.dao.custom.OrderDAO;
-import lk.ijse.pos.dao.custom.OrderDetailDAO;
+import lk.ijse.pos.dao.custom.OrderDetailsDAO;
 import lk.ijse.pos.dao.custom.impl.CustomerDAOImpl;
 import lk.ijse.pos.dao.custom.impl.ItemDAOImpl;
 import lk.ijse.pos.dao.custom.impl.OrderDAOImpl;
-import lk.ijse.pos.dao.custom.impl.OrderDetailDAOImpl;
+import lk.ijse.pos.dao.custom.impl.OrderDetailsDAOImpl;
 import lk.ijse.pos.db.DBConnection;
 import lk.ijse.pos.model.Customer;
 import lk.ijse.pos.model.Item;
@@ -35,11 +35,11 @@ import lk.ijse.pos.model.OrderDetails;
 import lk.ijse.pos.model.Orders;
 import lk.ijse.pos.view.tblmodel.OrderDetailTM;
 
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -57,12 +57,11 @@ import java.util.logging.Logger;
 
 public class OrderFormController implements Initializable {
 
+
     @FXML
     private JFXComboBox<String> cmbCustomerID;
     @FXML
     private JFXComboBox<String> cmbItemCode;
-
-
     @FXML
     private JFXTextField txtCustomerName;
     @FXML
@@ -75,9 +74,7 @@ public class OrderFormController implements Initializable {
     private JFXTextField txtQty;
     @FXML
     private TableView<OrderDetailTM> tblOrderDetails;
-
     private ObservableList<OrderDetailTM> olOrderDetails;
-
     private boolean update = false;
     @FXML
     private JFXButton btnRemove;
@@ -87,26 +84,26 @@ public class OrderFormController implements Initializable {
     private JFXTextField txtOrderID;
     @FXML
     private JFXDatePicker txtOrderDate;
-
     private Connection connection;
-
 
     private final CustomerDAO customerDAO = new CustomerDAOImpl();
     private final ItemDAO itemDAO = new ItemDAOImpl();
     private final OrderDAO orderDAO = new OrderDAOImpl();
-    private final OrderDetailDAO orderDetailDAO =  new OrderDetailDAOImpl();
+    private final OrderDetailsDAO orderDetailsDAO =  new OrderDetailsDAOImpl();
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+
         try {
             connection = DBConnection.getInstance().getConnection();
 
-
+            // Create a day cell factory
             Callback<DatePicker, DateCell> dayCellFactory = new Callback<DatePicker, DateCell>() {
                 public DateCell call(final DatePicker datePicker) {
                     return new DateCell() {
                         @Override
                         public void updateItem(LocalDate item, boolean empty) {
-
+                            // Must call super
                             super.updateItem(item, empty);
                             LocalDate today = LocalDate.now();
                             setDisable(empty || item.compareTo(today) < 0);
@@ -168,7 +165,7 @@ public class OrderFormController implements Initializable {
                     Item item = itemDAO.search(itemCode);
                     if (item != null) {
                         String description = item.getDescription();
-                        BigDecimal unitPrice = item.getUnitPrice();
+                        double unitPrice = item.getUnitPrice().doubleValue();
                         int qtyOnHand = item.getQtyOnHand();
 
                         txtDescription.setText(description);
@@ -324,16 +321,16 @@ public class OrderFormController implements Initializable {
         try {
             connection.setAutoCommit(false);
 
-
+            /*Add Order Record*/
             Orders orders = new Orders(txtOrderID.getText(), parseDate(txtOrderDate.getEditor().getText()), cmbCustomerID.getSelectionModel().getSelectedItem());
-            boolean b1 = orderDAO.addOrder(orders);
+            boolean b1 = orderDAO.add(orders);
             System.out.println("Order State :" + b1);
             if (!b1) {
                 connection.rollback();
                 return;
             }
 
-
+            /*Add Order Details to the Table*/
             for (OrderDetailTM orderDetailTM : olOrderDetails) {
 
                 OrderDetails orderDetails = new OrderDetails(
@@ -342,7 +339,7 @@ public class OrderFormController implements Initializable {
                         orderDetailTM.getQty(),
                         new BigDecimal(orderDetailTM.getUnitPrice()));
 
-                boolean b2 = orderDetailDAO.addOrderDetail(orderDetails);
+                boolean b2 = orderDetailsDAO.add(orderDetails);
                 System.out.println("Order Details State :" + b2);
                 if (!b2) {
                     connection.rollback();
@@ -351,7 +348,7 @@ public class OrderFormController implements Initializable {
 
                 int qtyOnHand = 0;
 
-                Item item = itemDAO.searchItem(orderDetailTM.getItemCode());
+                Item item = itemDAO.search(orderDetailTM.getItemCode());
 
                 if (item != null) {
                     qtyOnHand = item.getQtyOnHand();
@@ -399,4 +396,5 @@ public class OrderFormController implements Initializable {
             return null;
         }
     }
+
 }

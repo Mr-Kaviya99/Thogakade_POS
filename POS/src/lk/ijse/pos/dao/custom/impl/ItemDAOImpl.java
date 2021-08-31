@@ -7,7 +7,12 @@ import lk.ijse.pos.model.Item;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
+/**
+ * @author : Sanu Vithanage
+ * @since : 0.1.0
+ **/
 public class ItemDAOImpl implements ItemDAO {
+
     @Override
     public boolean add(Item item) throws Exception {
         return CrudUtil.executeUpdate("INSERT INTO Item VALUES (?,?,?,?)", item.getCode(), item.getDescription(), item.getUnitPrice(), item.getQtyOnHand());

@@ -5,7 +5,12 @@ import lk.ijse.pos.db.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
+
+/**
+ * @author : Sanu Vithanage
+ * @since : 0.1.0
+ **/
+
 
 public class CrudUtil {
     private static PreparedStatement getPreparedStatement(String sql, Object... data) throws Exception {

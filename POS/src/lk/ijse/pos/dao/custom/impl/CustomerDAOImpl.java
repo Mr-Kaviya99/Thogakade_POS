@@ -3,12 +3,16 @@ package lk.ijse.pos.dao.custom.impl;
 import lk.ijse.pos.dao.CrudUtil;
 import lk.ijse.pos.dao.custom.CustomerDAO;
 import lk.ijse.pos.model.Customer;
-import lk.ijse.pos.model.Item;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
+/**
+ * @author : Sanu Vithanage
+ * @since : 0.1.0
+ **/
 public class CustomerDAOImpl implements CustomerDAO {
+
     @Override
     public boolean add(Customer customer) throws Exception {
         return CrudUtil.executeUpdate("INSERT INTO Customer VALUES (?,?,?,?)", customer.getcID(), customer.getName(), customer.getAddress(), 0);
@@ -34,14 +38,14 @@ public class CustomerDAOImpl implements CustomerDAO {
     }
 
     @Override
-    public ArrayList<Item> getAll() throws Exception {
+    public ArrayList<Customer> getAll() throws Exception {
         ResultSet rst = CrudUtil.executeQuery("SELECT * FROM Customer");
         ArrayList<Customer> alCustomers = new ArrayList<>();
         while (rst.next()) {
             Customer customer = new Customer(rst.getString(1), rst.getString(2), rst.getString(3));
             alCustomers.add(customer);
         }
-        return allCustomers;
+        return alCustomers;
     }
 
 }
